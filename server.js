@@ -60,5 +60,5 @@ app.post('/delete-booking', (req, res) => {
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`https://nift-j-movie-night-booking-fhr56j396-yasar-c-hs-projects.vercel.app/`);
 });
