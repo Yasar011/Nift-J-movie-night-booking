@@ -236,7 +236,7 @@ bookingForm.addEventListener('submit', (e) => {
         const seatId = seat.textContent;
         const [row, col] = seatId.match(/[A-Z]+|[0-9]+/g);
 
-        fetch('http://localhost:5000/book-seat', {
+        fetch('https://nift-j-movie-night-booking-fhr56j396-yasar-c-hs-projects.vercel.app/book-seat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
