@@ -16,8 +16,7 @@
 
         .container {
             margin: 20px auto;
-            max-width: 100%;
-            padding: 0 10px;
+            max-width: 900px;
         }
 
         .screen {
@@ -35,7 +34,6 @@
             display: flex;
             justify-content: center;
             margin: 10px 0;
-            flex-wrap: wrap;
         }
 
         .gap-row {
@@ -43,8 +41,8 @@
         }
 
         .seat {
-            width: 10vw; /* Dynamic width based on viewport width */
-            height: 10vw; /* Dynamic height based on viewport width */
+            width: 40px;
+            height: 40px;
             margin: 5px;
             background-color: #6c757d;
             border-radius: 5px;
@@ -53,7 +51,6 @@
             justify-content: center;
             color: white;
             cursor: pointer;
-            transition: background-color 0.3s ease;
         }
 
         .seat.selected {
@@ -66,14 +63,14 @@
         }
 
         .gap-seat {
-            width: 5vw; /* Gap between seats 10 and 11 */
+            width: 20px; /* Gap between seats 10 and 11 */
         }
 
         #bookingForm {
             display: none;
             margin-top: 20px;
             text-align: left;
-            max-width: 100%;
+            max-width: 400px;
             margin: 20px auto;
             background: #fff;
             padding: 20px;
@@ -111,29 +108,65 @@
             cursor: not-allowed;
         }
 
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .seat {
-                width: 15vw;
-                height: 15vw;
-            }
-
-            #bookingForm {
-                max-width: 90%;
-            }
+        .movie-details {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #444;
+            color: white;
+            border-radius: 5px;
         }
 
-        @media (max-width: 480px) {
-            .seat {
-                width: 20vw;
-                height: 20vw;
-            }
-
-            .screen {
-                width: 90%;
-            }
+        .movie-details p {
+            margin: 5px 0;
         }
     </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Seating Chart</h1>
+        <div class="screen">Screen</div>
+        <div id="seatingChart"></div>
+
+        <form id="bookingForm">
+            <div class="movie-details">
+                <p><strong>Movie:</strong> Aavesham</p>
+                <p><strong>Show Time:</strong> 9:00 PM</p>
+                <p><strong>Price:</strong> ₹300</p>
+            </div>
+
+            <h3>Booking Details</h3>
+            <input type="text" id="name" placeholder="Name" required>
+            <select id="department" required>
+                <option value="" disabled selected>Department</option>
+                <option value="AD">AD</option>
+                <option value="BDT">BDT</option>
+                <option value="FC">FC</option>
+                <option value="FD">FD</option>
+                <option value="MFM">MFM</option>
+                <option value="TD">TD</option>
+                <option value="STAFF">Staff</option>
+                <option value="FACULTY">Faculty</option>
+                <option value="OTHER">Other</option>
+            </select>
+            <select id="semester" required>
+                <option value="" disabled selected>Semester</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="OTHER">Other</option>
+            </select>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="text" id="phone" placeholder="Phone" required>
+            <input type="text" id="seatNumber" disabled>
+            <button type="submit">Book Now</button>
+        </form>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js";
@@ -160,7 +193,7 @@
             const seatingChart = document.getElementById("seatingChart");
             const bookingForm = document.getElementById("bookingForm");
             const totalSeats = 200;
-            const rows = 10; // A-J (10 rows)
+            const rows = 10;
             const seatsPerRow = 20;
             let seatCount = 0;
 
@@ -172,7 +205,6 @@
                 seatingChart.innerHTML = "";
 
                 for (let i = 0; i < rows; i++) {
-                    // Add gap between 5th and 6th row
                     if (i === 5) {
                         const gapRow = document.createElement("div");
                         gapRow.classList.add("gap-row");
@@ -183,7 +215,6 @@
                     rowElement.classList.add("row");
 
                     for (let j = 0; j < seatsPerRow; j++) {
-                        // Add gap between 10th and 11th seats
                         if (j === 10) {
                             const gapSeat = document.createElement("div");
                             gapSeat.classList.add("gap-seat");
@@ -194,7 +225,7 @@
                         if (seatCount < totalSeats) {
                             const seatElement = document.createElement("div");
                             seatElement.classList.add("seat");
-                            const seatId = `${String.fromCharCode(65 + i)}${j + 1}`; // Row A-J, Seat 1-20
+                            const seatId = `${String.fromCharCode(65 + i)}${j + 1}`;
 
                             if (seatData[seatId]) {
                                 seatElement.classList.add("occupied");
@@ -245,56 +276,16 @@
                     selectedSeat.classList.add("occupied");
                 }
 
-                // Redirect to Google Form after booking
-                window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
-
                 bookingForm.style.display = "none";
                 bookingForm.reset();
                 selectedSeat = null;
 
                 alert(`Seat ${seatNumber} booked successfully!`);
+
+                // Redirect to the Google Form
+                window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
             });
         });
     </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Seating Chart</h1>
-        <div class="screen">Screen</div>
-        <div id="seatingChart"></div>
-
-        <form id="bookingForm">
-            <h3>Booking Details</h3>
-            <input type="text" id="name" placeholder="Name" required>
-            <select id="department" required>
-                <option value="" disabled selected>Department</option>
-                <option value="AD">AD</option>
-                <option value="BDT">BDT</option>
-                <option value="FC">FC</option>
-                <option value="FD">FD</option>
-                <option value="MFM">MFM</option>
-                <option value="TD">TD</option>
-                <option value="STAFF">Staff</option>
-                <option value="FACULTY">Faculty</option>
-                <option value="OTHER">Other</option>
-            </select>
-            <select id="semester" required>
-                <option value="" disabled selected>Semester</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="OTHER">Other</option>
-            </select>
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="text" id="phone" placeholder="Phone" required>
-            <input type="text" id="seatNumber" disabled>
-            <button type="submit">Book Now</button>
-        </form>
-    </div>
 </body>
 </html>
