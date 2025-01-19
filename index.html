@@ -160,7 +160,7 @@
             const seatingChart = document.getElementById("seatingChart");
             const bookingForm = document.getElementById("bookingForm");
             const totalSeats = 200;
-            const rows = 10;
+            const rows = 10; // A-J (10 rows)
             const seatsPerRow = 20;
             let seatCount = 0;
 
@@ -172,6 +172,7 @@
                 seatingChart.innerHTML = "";
 
                 for (let i = 0; i < rows; i++) {
+                    // Add gap between 5th and 6th row
                     if (i === 5) {
                         const gapRow = document.createElement("div");
                         gapRow.classList.add("gap-row");
@@ -182,6 +183,7 @@
                     rowElement.classList.add("row");
 
                     for (let j = 0; j < seatsPerRow; j++) {
+                        // Add gap between 10th and 11th seats
                         if (j === 10) {
                             const gapSeat = document.createElement("div");
                             gapSeat.classList.add("gap-seat");
@@ -192,7 +194,7 @@
                         if (seatCount < totalSeats) {
                             const seatElement = document.createElement("div");
                             seatElement.classList.add("seat");
-                            const seatId = `${String.fromCharCode(65 + i)}${j + 1}`;
+                            const seatId = `${String.fromCharCode(65 + i)}${j + 1}`; // Row A-J, Seat 1-20
 
                             if (seatData[seatId]) {
                                 seatElement.classList.add("occupied");
@@ -267,7 +269,7 @@
             <select id="department" required>
                 <option value="" disabled selected>Department</option>
                 <option value="AD">AD</option>
-                <option value="BFT">BDT</option>
+                <option value="BDT">BDT</option>
                 <option value="FC">FC</option>
                 <option value="FD">FD</option>
                 <option value="MFM">MFM</option>
