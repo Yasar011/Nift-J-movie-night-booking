@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seating Chart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            margin: 20px auto;
+            max-width: 900px;
+        }
+
+        .screen {
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #444;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            width: 80%;
+            text-align: center;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .gap-row {
+            height: 20px; /* Gap between rows 5 and 6 */
+        }
+
+        .seat {
+            width: 40px;
+            height: 40px;
+            margin: 5px;
+            background-color: #6c757d;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+        }
+
+        .seat.selected {
+            background-color: #28a745;
+        }
+
+        .seat.occupied {
+            background-color: #dc3545;
+            cursor: not-allowed;
+        }
+
+        .gap-seat {
+            width: 20px; /* Gap between seats 10 and 11 */
+        }
+
+        #bookingForm {
+            display: none;
+            margin-top: 20px;
+            text-align: left;
+            max-width: 400px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        #bookingForm h3 {
+            margin-bottom: 10px;
+        }
+
+        #bookingForm input,
+        #bookingForm select {
+            width: 100%;
+            margin: 5px 0 15px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        #bookingForm button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #bookingForm button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpew8ODVHmmGndhZxQ3VK_CEurW0_EQyU",
+            authDomain: "nift-movie-nigt-apc.firebaseapp.com",
+            databaseURL: "https://nift-movie-nigt-apc-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nift-movie-nigt-apc",
+            storageBucket: "nift-movie-nigt-apc.appspot.com",
+            messagingSenderId: "736122244542",
+            appId: "1:736122244542:web:69d88050a26fc8391dbdef",
+            measurementId: "G-GL1MBM6DW6"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let selectedSeat = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const seatingChart = document.getElementById("seatingChart");
+            const bookingForm = document.getElementById("bookingForm");
+            const totalSeats = 200;
+            const rows = 10;
+            const seatsPerRow = 20;
+            let seatCount = 0;
+
+            // Load seat data from Firebase
+            const seatStatusRef = ref(database, "seats/");
+            onValue(seatStatusRef, (snapshot) => {
+                const seatData = snapshot.val() || {};
+
+                seatingChart.innerHTML = "";
+
+                for (let i = 0; i < rows; i++) {
+                    if (i === 5) {
+                        const gapRow = document.createElement("div");
+                        gapRow.classList.add("gap-row");
+                        seatingChart.appendChild(gapRow);
+                    }
+
+                    const rowElement = document.createElement("div");
+                    rowElement.classList.add("row");
+
+                    for (let j = 0; j < seatsPerRow; j++) {
+                        if (j === 10) {
+                            const gapSeat = document.createElement("div");
+                            gapSeat.classList.add("gap-seat");
+                            rowElement.appendChild(gapSeat);
+                            continue;
+                        }
+
+                        if (seatCount < totalSeats) {
+                            const seatElement = document.createElement("div");
+                            seatElement.classList.add("seat");
+                            const seatId = `${String.fromCharCode(65 + i)}${j + 1}`;
+
+                            if (seatData[seatId]) {
+                                seatElement.classList.add("occupied");
+                            }
+
+                            seatElement.textContent = seatId;
+                            seatElement.addEventListener("click", () => {
+                                if (!seatElement.classList.contains("occupied")) {
+                                    if (selectedSeat) {
+                                        selectedSeat.classList.remove("selected");
+                                    }
+                                    seatElement.classList.add("selected");
+                                    selectedSeat = seatElement;
+
+                                    bookingForm.style.display = "block";
+                                    document.getElementById("seatNumber").value = seatId;
+                                }
+                            });
+                            rowElement.appendChild(seatElement);
+                            seatCount++;
+                        }
+                    }
+                    seatingChart.appendChild(rowElement);
+                }
+            });
+
+            bookingForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+
+                const name = document.getElementById("name").value;
+                const department = document.getElementById("department").value;
+                const semester = document.getElementById("semester").value;
+                const email = document.getElementById("email").value;
+                const phone = document.getElementById("phone").value;
+                const seatNumber = document.getElementById("seatNumber").value;
+
+                set(ref(database, `seats/${seatNumber}`), {
+                    status: "occupied",
+                    name,
+                    department,
+                    semester,
+                    email,
+                    phone,
+                });
+
+                if (selectedSeat) {
+                    selectedSeat.classList.remove("selected");
+                    selectedSeat.classList.add("occupied");
+                }
+
+                bookingForm.style.display = "none";
+                bookingForm.reset();
+                selectedSeat = null;
+
+                alert(`Seat ${seatNumber} booked successfully!`);
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Seating Chart</h1>
+        <div class="screen">Screen</div>
+        <div id="seatingChart"></div>
+
+        <form id="bookingForm">
+            <h3>Booking Details</h3>
+            <input type="text" id="name" placeholder="Name" required>
+            <select id="department" required>
+                <option value="" disabled selected>Department</option>
+                <option value="AD">AD</option>
+                <option value="BDT">BDT</option>
+                <option value="FC">FC</option>
+                <option value="FD">FD</option>
+                <option value="MFM">MFM</option>
+                <option value="TD">TD</option>
+                <option value="STAFF">Staff</option>
+                <option value="FACULTY">Faculty</option>
+                <option value="OTHER">Other</option>
+            </select>
+            <select id="semester" required>
+                <option value="" disabled selected>Semester</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="OTHER">Other</option>
+            </select>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="text" id="phone" placeholder="Phone" required>
+            <input type="text" id="seatNumber" disabled>
+            <button type="submit">Book Now</button>
+        </form>
+    </div>
+</body>
+</html>
