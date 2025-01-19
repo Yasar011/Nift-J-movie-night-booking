@@ -16,7 +16,8 @@
 
         .container {
             margin: 20px auto;
-            max-width: 900px;
+            max-width: 100%;
+            padding: 0 10px;
         }
 
         .screen {
@@ -34,6 +35,7 @@
             display: flex;
             justify-content: center;
             margin: 10px 0;
+            flex-wrap: wrap;
         }
 
         .gap-row {
@@ -41,8 +43,8 @@
         }
 
         .seat {
-            width: 40px;
-            height: 40px;
+            width: 10vw; /* Dynamic width based on viewport width */
+            height: 10vw; /* Dynamic height based on viewport width */
             margin: 5px;
             background-color: #6c757d;
             border-radius: 5px;
@@ -51,6 +53,7 @@
             justify-content: center;
             color: white;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
         .seat.selected {
@@ -63,14 +66,14 @@
         }
 
         .gap-seat {
-            width: 20px; /* Gap between seats 10 and 11 */
+            width: 5vw; /* Gap between seats 10 and 11 */
         }
 
         #bookingForm {
             display: none;
             margin-top: 20px;
             text-align: left;
-            max-width: 400px;
+            max-width: 100%;
             margin: 20px auto;
             background: #fff;
             padding: 20px;
@@ -106,6 +109,29 @@
         #bookingForm button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .seat {
+                width: 15vw;
+                height: 15vw;
+            }
+
+            #bookingForm {
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .seat {
+                width: 20vw;
+                height: 20vw;
+            }
+
+            .screen {
+                width: 90%;
+            }
         }
     </style>
     <script type="module">
@@ -217,6 +243,9 @@
                     selectedSeat.classList.add("occupied");
                 }
 
+                // Redirect to Google Form after booking
+                window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
+
                 bookingForm.style.display = "none";
                 bookingForm.reset();
                 selectedSeat = null;
@@ -238,7 +267,7 @@
             <select id="department" required>
                 <option value="" disabled selected>Department</option>
                 <option value="AD">AD</option>
-                <option value="BDT">BDT</option>
+                <option value="BFT">BDT</option>
                 <option value="FC">FC</option>
                 <option value="FD">FD</option>
                 <option value="MFM">MFM</option>
