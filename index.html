@@ -7,8 +7,8 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
+            background-color: #000;
+            color: #fff;
             text-align: center;
             margin: 0;
             padding: 0;
@@ -119,21 +119,67 @@
         .movie-details p {
             margin: 5px 0;
         }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .legend div {
+            margin: 0 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .legend div span {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+
+        .legend .available span {
+            background-color: #6c757d;
+        }
+
+        .legend .selected span {
+            background-color: #28a745;
+        }
+
+        .legend .occupied span {
+            background-color: #dc3545;
+        }
+
+        #successMessage {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Seating Chart</h1>
+        <div class="movie-details">
+            <p><strong>Movie:</strong> Aavesham</p>
+            <p><strong>Show Time:</strong> 9:00 PM</p>
+            <p><strong>Price:</strong> ₹300</p>
+        </div>
+        <div class="legend">
+            <div class="available"><span></span>Available</div>
+            <div class="selected"><span></span>Selected</div>
+            <div class="occupied"><span></span>Occupied</div>
+        </div>
         <div class="screen">Screen</div>
         <div id="seatingChart"></div>
 
-        <form id="bookingForm">
-            <div class="movie-details">
-                <p><strong>Movie:</strong> Aavesham</p>
-                <p><strong>Show Time:</strong> 9:00 PM</p>
-                <p><strong>Price:</strong> ₹300</p>
-            </div>
+        <div id="successMessage">Your booking was successful! You will be redirected for payment shortly.</div>
 
+        <form id="bookingForm">
             <h3>Booking Details</h3>
             <input type="text" id="name" placeholder="Name" required>
             <select id="department" required>
@@ -192,6 +238,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             const seatingChart = document.getElementById("seatingChart");
             const bookingForm = document.getElementById("bookingForm");
+            const successMessage = document.getElementById("successMessage");
             const totalSeats = 200;
             const rows = 10;
             const seatsPerRow = 20;
@@ -280,10 +327,10 @@
                 bookingForm.reset();
                 selectedSeat = null;
 
-                alert(`Seat ${seatNumber} booked successfully!`);
-
-                // Redirect to the Google Form
-                window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
+                successMessage.style.display = "block";
+                setTimeout(() => {
+                    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
+                }, 2000);
             });
         });
     </script>
