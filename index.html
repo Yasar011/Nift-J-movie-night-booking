@@ -23,6 +23,9 @@
             background-color: #007bff;
             padding: 20px;
             border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .header h1 {
@@ -32,6 +35,14 @@
 
         .header p {
             margin: 5px 0;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #fff;
+            display: inline-block;
         }
 
         .screen {
@@ -179,17 +190,22 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Movie Night Booking</h1>
-            <p><strong>"Aavesham"</strong> | Show Time: 9:00 PM</p>
+            <div class="logo" id="collegeLogo"></div>
+            <div>
+                <h1>Movie Night Booking</h1>
+                <p><strong>"Aavesham"</strong> | Show Time: 9:00 PM</p>
+            </div>
+            <div class="logo" id="clubLogo"></div>
         </div>
-        <div class="screen">Screen</div>
-        <div id="seatingChart"></div>
 
         <div class="legend">
             <div><div class="box available"></div>Available</div>
             <div><div class="box selected"></div>Selected</div>
             <div><div class="box occupied"></div>Occupied</div>
         </div>
+
+        <div class="screen">Screen</div>
+        <div id="seatingChart"></div>
 
         <div id="successMessage">Booking successful! Redirecting to payment...</div>
 
