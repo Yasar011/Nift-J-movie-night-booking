@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seating Chart</title>
+    <title>Movie Night Booking</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #000;
+            background-color: #333;
             color: #fff;
             text-align: center;
             margin: 0;
@@ -19,11 +19,25 @@
             max-width: 900px;
         }
 
+        .header {
+            background-color: #007bff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .header p {
+            margin: 5px 0;
+        }
+
         .screen {
             margin: 20px auto;
             padding: 10px;
             background-color: #444;
-            color: white;
             font-weight: bold;
             border-radius: 5px;
             width: 80%;
@@ -127,59 +141,65 @@
         }
 
         .legend div {
-            margin: 0 10px;
             display: flex;
             align-items: center;
+            margin: 0 10px;
         }
 
-        .legend div span {
-            display: inline-block;
+        .legend .box {
             width: 20px;
             height: 20px;
             margin-right: 5px;
+            border-radius: 5px;
         }
 
-        .legend .available span {
+        .legend .available {
             background-color: #6c757d;
         }
 
-        .legend .selected span {
+        .legend .selected {
             background-color: #28a745;
         }
 
-        .legend .occupied span {
+        .legend .occupied {
             background-color: #dc3545;
         }
 
         #successMessage {
             display: none;
-            margin-top: 20px;
-            padding: 10px;
             background-color: #28a745;
             color: white;
+            padding: 15px;
             border-radius: 5px;
+            margin: 20px auto;
+            max-width: 400px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Seating Chart</h1>
-        <div class="movie-details">
-            <p><strong>Movie:</strong> Aavesham</p>
-            <p><strong>Show Time:</strong> 9:00 PM</p>
-            <p><strong>Price:</strong> ₹300</p>
-        </div>
-        <div class="legend">
-            <div class="available"><span></span>Available</div>
-            <div class="selected"><span></span>Selected</div>
-            <div class="occupied"><span></span>Occupied</div>
+        <div class="header">
+            <h1>Movie Night Booking</h1>
+            <p><strong>"Aavesham"</strong> | Show Time: 9:00 PM</p>
         </div>
         <div class="screen">Screen</div>
         <div id="seatingChart"></div>
 
-        <div id="successMessage">Your booking was successful! You will be redirected for payment shortly.</div>
+        <div class="legend">
+            <div><div class="box available"></div>Available</div>
+            <div><div class="box selected"></div>Selected</div>
+            <div><div class="box occupied"></div>Occupied</div>
+        </div>
+
+        <div id="successMessage">Booking successful! Redirecting to payment...</div>
 
         <form id="bookingForm">
+            <div class="movie-details">
+                <p><strong>Movie:</strong> Aavesham</p>
+                <p><strong>Show Time:</strong> 9:00 PM</p>
+                <p><strong>Price:</strong> ₹300</p>
+            </div>
+
             <h3>Booking Details</h3>
             <input type="text" id="name" placeholder="Name" required>
             <select id="department" required>
@@ -329,8 +349,9 @@
 
                 successMessage.style.display = "block";
                 setTimeout(() => {
+                    successMessage.style.display = "none";
                     window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
-                }, 2000);
+                }, 3000);
             });
         });
     </script>
