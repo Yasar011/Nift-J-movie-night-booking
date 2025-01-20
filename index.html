@@ -169,9 +169,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js";
+        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBpew8ODVHmmGndhZxQ3VK_CEurW0_EQyU",
             authDomain: "nift-movie-nigt-apc.firebaseapp.com",
@@ -183,25 +182,22 @@
             measurementId: "G-GL1MBM6DW6"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
         let selectedSeat = null;
+        const lockDuration = 2 * 60 * 1000; // Lock duration in milliseconds (2 minutes)
 
         document.addEventListener("DOMContentLoaded", () => {
             const seatingChart = document.getElementById("seatingChart");
             const bookingForm = document.getElementById("bookingForm");
-            const totalSeats = 200;
             const rows = 10;
             const seatsPerRow = 20;
-            let seatCount = 0;
 
             // Load seat data from Firebase
             const seatStatusRef = ref(database, "seats/");
             onValue(seatStatusRef, (snapshot) => {
                 const seatData = snapshot.val() || {};
-
                 seatingChart.innerHTML = "";
 
                 for (let i = 0; i < rows; i++) {
@@ -222,111 +218,81 @@
                             continue;
                         }
 
-                        if (seatCount < totalSeats) {
-                            const seatElement = document.createElement("div");
-                            seatElement.classList.add("seat");
-                            const seatId = `${String.fromCharCode(65 + i)}${j + 1}`;
+                        const seatId = `${String.fromCharCode(65 + i)}${j + 1}`;
+                        const seatElement = document.createElement("div");
+                        seatElement.classList.add("seat");
 
-                            if (seatData[seatId]) {
+                        const seat = seatData[seatId];
+                        if (seat) {
+                            if (seat.status === "occupied") {
                                 seatElement.classList.add("occupied");
+                            } else if (seat.status === "locked") {
+                                const lockExpired = Date.now() - seat.lockTime > lockDuration;
+                                if (lockExpired) {
+                                    update(ref(database, `seats/${seatId}`), { status: "available", lockTime: null });
+                                } else {
+                                    seatElement.classList.add("locked");
+                                }
+                            }
+                        }
+
+                        seatElement.textContent = seatId;
+                        seatElement.addEventListener("click", () => {
+                            if (seatElement.classList.contains("occupied") || seatElement.classList.contains("locked")) {
+                                return;
                             }
 
-                            seatElement.textContent = seatId;
-                            seatElement.addEventListener("click", () => {
-                                if (!seatElement.classList.contains("occupied")) {
-                                    if (selectedSeat) {
-                                        selectedSeat.classList.remove("selected");
-                                    }
-                                    seatElement.classList.add("selected");
-                                    selectedSeat = seatElement;
+                            if (selectedSeat) {
+                                selectedSeat.classList.remove("selected");
+                                update(ref(database, `seats/${selectedSeat.textContent}`), { status: "available", lockTime: null });
+                            }
 
-                                    bookingForm.style.display = "block";
-                                    document.getElementById("seatNumber").value = seatId;
-                                }
+                            seatElement.classList.add("selected");
+                            selectedSeat = seatElement;
+
+                            update(ref(database, `seats/${seatId}`), {
+                                status: "locked",
+                                lockTime: Date.now()
                             });
-                            rowElement.appendChild(seatElement);
-                            seatCount++;
-                        }
+
+                            bookingForm.style.display = "block";
+                            document.getElementById("seatNumber").value = seatId;
+                        });
+
+                        rowElement.appendChild(seatElement);
                     }
                     seatingChart.appendChild(rowElement);
                 }
             });
 
-bookingForm.addEventListener("submit", (e) => {
-    e.preventDefault();
+            // Handle booking form submission
+            bookingForm.addEventListener("submit", (event) => {
+                event.preventDefault();
 
-    const name = document.getElementById("name").value;
-    const department = document.getElementById("department").value;
-    const semester = document.getElementById("semester").value;
-    const email = document.getElementById("email").value;
-    const phone = document.getElementById("phone").value;
-    const seatNumber = document.getElementById("seatNumber").value;
+                const seatId = document.getElementById("seatNumber").value;
+                const name = document.getElementById("name").value;
+                const department = document.getElementById("department").value;
+                const semester = document.getElementById("semester").value;
+                const email = document.getElementById("email").value;
+                const phone = document.getElementById("phone").value;
 
-    // Mark seat as "occupied" in Firebase
-    set(ref(database, `seats/${seatNumber}`), {
-        status: "occupied",
-        name,
-        department,
-        semester,
-        email,
-        phone,
-    });
-
-    if (selectedSeat) {
-        selectedSeat.classList.remove("selected");
-        selectedSeat.classList.add("occupied");
-    }
-
-    bookingForm.style.display = "none";
-    bookingForm.reset();
-    selectedSeat = null;
-
-    alert(`Seat ${seatNumber} booked successfully!`);
-
-    // Redirect to Google Form
-    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
-});
-
-// Lock the seat when selected
-const lockSeat = (seatId) => {
-    const lockTime = Date.now();
-    set(ref(database, `seats/${seatId}`), {
-        status: "locked",
-        lockTime: lockTime,
-    });
-
-    // Unlock the seat after 2 minutes if not booked
-    setTimeout(() => {
-        const seatRef = ref(database, `seats/${seatId}`);
-        onValue(seatRef, (snapshot) => {
-            const seatData = snapshot.val();
-            if (seatData && seatData.status === "locked") {
-                const currentTime = Date.now();
-                if (currentTime - seatData.lockTime >= 2 * 60 * 1000) {
-                    set(seatRef, null); // Unlock the seat by removing data
+                if (selectedSeat) {
+                    set(ref(database, `seats/${seatId}`), {
+                        status: "occupied",
+                        user: { name, department, semester, email, phone }
+                    }).then(() => {
+                        alert("Booking successful!");
+                        selectedSeat.classList.add("occupied");
+                        selectedSeat.classList.remove("selected");
+                        selectedSeat = null;
+                        bookingForm.reset();
+                        bookingForm.style.display = "none";
+                    }).catch((error) => {
+                        alert("Booking failed: " + error.message);
+                    });
                 }
-            }
+            });
         });
-    }, 2 * 60 * 1000);
-};
-
-// Handle seat click
-seatElement.addEventListener("click", () => {
-    if (!seatElement.classList.contains("occupied")) {
-        if (selectedSeat) {
-            selectedSeat.classList.remove("selected");
-        }
-        seatElement.classList.add("selected");
-        selectedSeat = seatElement;
-
-        bookingForm.style.display = "block";
-        document.getElementById("seatNumber").value = seatId;
-
-        // Lock the seat
-        lockSeat(seatId);
-    }
-});
-
     </script>
 </body>
 </html>
