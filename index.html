@@ -252,40 +252,81 @@
                 }
             });
 
-            bookingForm.addEventListener("submit", (e) => {
-                e.preventDefault();
+bookingForm.addEventListener("submit", (e) => {
+    e.preventDefault();
 
-                const name = document.getElementById("name").value;
-                const department = document.getElementById("department").value;
-                const semester = document.getElementById("semester").value;
-                const email = document.getElementById("email").value;
-                const phone = document.getElementById("phone").value;
-                const seatNumber = document.getElementById("seatNumber").value;
+    const name = document.getElementById("name").value;
+    const department = document.getElementById("department").value;
+    const semester = document.getElementById("semester").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
+    const seatNumber = document.getElementById("seatNumber").value;
 
-                set(ref(database, `seats/${seatNumber}`), {
-                    status: "occupied",
-                    name,
-                    department,
-                    semester,
-                    email,
-                    phone,
-                });
+    // Mark seat as "occupied" in Firebase
+    set(ref(database, `seats/${seatNumber}`), {
+        status: "occupied",
+        name,
+        department,
+        semester,
+        email,
+        phone,
+    });
 
-                if (selectedSeat) {
-                    selectedSeat.classList.remove("selected");
-                    selectedSeat.classList.add("occupied");
+    if (selectedSeat) {
+        selectedSeat.classList.remove("selected");
+        selectedSeat.classList.add("occupied");
+    }
+
+    bookingForm.style.display = "none";
+    bookingForm.reset();
+    selectedSeat = null;
+
+    alert(`Seat ${seatNumber} booked successfully!`);
+
+    // Redirect to Google Form
+    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
+});
+
+// Lock the seat when selected
+const lockSeat = (seatId) => {
+    const lockTime = Date.now();
+    set(ref(database, `seats/${seatId}`), {
+        status: "locked",
+        lockTime: lockTime,
+    });
+
+    // Unlock the seat after 2 minutes if not booked
+    setTimeout(() => {
+        const seatRef = ref(database, `seats/${seatId}`);
+        onValue(seatRef, (snapshot) => {
+            const seatData = snapshot.val();
+            if (seatData && seatData.status === "locked") {
+                const currentTime = Date.now();
+                if (currentTime - seatData.lockTime >= 2 * 60 * 1000) {
+                    set(seatRef, null); // Unlock the seat by removing data
                 }
-
-                bookingForm.style.display = "none";
-                bookingForm.reset();
-                selectedSeat = null;
-
-                alert(`Seat ${seatNumber} booked successfully!`);
-
-                // Redirect to the Google Form
-                window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
-            });
+            }
         });
+    }, 2 * 60 * 1000);
+};
+
+// Handle seat click
+seatElement.addEventListener("click", () => {
+    if (!seatElement.classList.contains("occupied")) {
+        if (selectedSeat) {
+            selectedSeat.classList.remove("selected");
+        }
+        seatElement.classList.add("selected");
+        selectedSeat = seatElement;
+
+        bookingForm.style.display = "block";
+        document.getElementById("seatNumber").value = seatId;
+
+        // Lock the seat
+        lockSeat(seatId);
+    }
+});
+
     </script>
 </body>
 </html>
