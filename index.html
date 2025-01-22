@@ -62,7 +62,7 @@
         }
 
         .gap-row {
-            height: 20px; /* Gap between rows 5 and 6 */
+            height: 20px; /* Gap between rows 4 and 5 */
         }
 
         .seat {
@@ -88,7 +88,7 @@
         }
 
         .gap-seat {
-            width: 20px; /* Gap between seats 10 and 11 */
+            width: 20px; /* Gap between seats 15 and 16 */
         }
 
         #bookingForm {
@@ -275,9 +275,9 @@
             const seatingChart = document.getElementById("seatingChart");
             const bookingForm = document.getElementById("bookingForm");
             const successMessage = document.getElementById("successMessage");
-            const totalSeats = 200;
-            const rows = 10;
-            const seatsPerRow = 20;
+            const totalSeats = 240;
+            const rows = 8;
+            const seatsPerRow = 30;
             let seatCount = 0;
 
             // Load seat data from Firebase
@@ -288,7 +288,7 @@
                 seatingChart.innerHTML = "";
 
                 for (let i = 0; i < rows; i++) {
-                    if (i === 5) {
+                    if (i === 4) {
                         const gapRow = document.createElement("div");
                         gapRow.classList.add("gap-row");
                         seatingChart.appendChild(gapRow);
@@ -298,7 +298,7 @@
                     rowElement.classList.add("row");
 
                     for (let j = 0; j < seatsPerRow; j++) {
-                        if (j === 10) {
+                        if (j === 15) {
                             const gapSeat = document.createElement("div");
                             gapSeat.classList.add("gap-seat");
                             rowElement.appendChild(gapSeat);
