@@ -17,6 +17,7 @@
         .container {
             margin: 20px auto;
             max-width: 1200px;
+            padding: 10px;
         }
 
         .header {
@@ -46,12 +47,13 @@
             display: flex;
             justify-content: center;
             margin: 20px 0;
+            flex-wrap: wrap;
         }
 
         .legend div {
             display: flex;
             align-items: center;
-            margin: 0 10px;
+            margin: 5px 10px;
         }
 
         .legend .box {
@@ -79,24 +81,25 @@
             background-color: #444;
             font-weight: bold;
             border-radius: 5px;
-            width: 80%;
+            width: 90%;
             text-align: center;
         }
 
         .row {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
             margin: 10px 0;
         }
 
         .gap-row {
-            height: 20px; /* Gap between rows */
+            height: 20px;
         }
 
         .seat {
-            width: 40px;
-            height: 40px;
-            margin: 5px;
+            width: 30px;
+            height: 30px;
+            margin: 3px;
             background-color: #6c757d;
             border-radius: 5px;
             display: flex;
@@ -118,9 +121,9 @@
         }
 
         .gap-seat {
-            width: 40px;
-            height: 40px;
-            margin: 5px;
+            width: 30px;
+            height: 30px;
+            margin: 3px;
             background-color: transparent;
         }
 
@@ -166,24 +169,57 @@
             cursor: not-allowed;
         }
 
-        #successMessage {
+        #successMessage, #errorMessage {
             display: none;
-            background-color: #28a745;
-            color: white;
             padding: 15px;
             border-radius: 5px;
             margin: 20px auto;
             max-width: 400px;
+        }
+
+        #successMessage {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #errorMessage {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        #loading {
+            display: none;
+            margin: 20px auto;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .seat {
+                width: 25px;
+                height: 25px;
+                margin: 2px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .screen {
+                width: 95%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <img src="college_logo.png" alt="College Logo">
+            <img src="college_logo.png" alt="College Logo"> <img src="club_logo.png" alt="Club Logo">
             <h1>National Institute of Fashion Technology, Jodhpur</h1>
             <p>Adventure & Photography Club</p>
-            <img src="club_logo.png" alt="Club Logo">
+            <p><strong>Movie:</strong> Border(1997) </p>
+                <p><strong>Show Time:</strong> 9:15 PM</p>
+                <p><strong>Price:</strong> ₹29</p>
+        
         </div>
 
         <div class="legend">
@@ -193,15 +229,17 @@
         </div>
 
         <div class="screen">Screen</div>
+        <div id="loading">Loading seats...</div>
         <div id="seatingChart"></div>
 
         <div id="successMessage">Booking successful! Redirecting to payment...</div>
+        <div id="errorMessage">An error occurred while booking. Please try again.</div>
 
         <form id="bookingForm">
             <div class="movie-details">
-                <p><strong>Movie:</strong> Aavesham</p>
-                <p><strong>Show Time:</strong> 9:00 PM</p>
-                <p><strong>Price:</strong> ₹300</p>
+                <p><strong>Movie:</strong> Border(1997) </p>
+                <p><strong>Show Time:</strong> 9:15 PM</p>
+                <p><strong>Price:</strong> ₹29</p>
             </div>
 
             <h3>Booking Details</h3>
@@ -209,7 +247,7 @@
             <select id="department" required>
                 <option value="" disabled selected>Department</option>
                 <option value="AD">AD</option>
-                <option value="BDT">BDT</option>
+                <option value="BDT">BFT</option>
                 <option value="FC">FC</option>
                 <option value="FD">FD</option>
                 <option value="MFM">MFM</option>
@@ -231,7 +269,7 @@
                 <option value="OTHER">Other</option>
             </select>
             <input type="email" id="email" placeholder="Email" required>
-            <input type="text" id="phone" placeholder="Phone" required>
+            <input type="text" id="phone" placeholder="Phone" pattern="[0-9]{10}" required>
             <input type="text" id="seatNumber" disabled>
             <button type="submit">Book Now</button>
         </form>
@@ -247,7 +285,7 @@
             authDomain: "nift-movie-nigt-apc.firebaseapp.com",
             databaseURL: "https://nift-movie-nigt-apc-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "nift-movie-nigt-apc",
-            storageBucket: "nift-movie-nigt-apc.appspot.com",
+            storageBucket: "nift-movie-nigt-apc.firebasestorage.app",
             messagingSenderId: "736122244542",
             appId: "1:736122244542:web:69d88050a26fc8391dbdef",
             measurementId: "G-GL1MBM6DW6"
@@ -258,20 +296,28 @@
         const database = getDatabase(app);
 
         let selectedSeat = null;
+        const totalSeats = 240; // Example total seat count
 
         document.addEventListener("DOMContentLoaded", () => {
             const seatingChart = document.getElementById("seatingChart");
             const bookingForm = document.getElementById("bookingForm");
             const successMessage = document.getElementById("successMessage");
+            const errorMessage = document.getElementById("errorMessage");
+            const loadingIndicator = document.getElementById("loading");
             const rows = 8;
             const seatsPerRow = 30;
 
             // Load seat data from Firebase
             const seatStatusRef = ref(database, "seats/");
+
+            loadingIndicator.style.display = "block";
+
             onValue(seatStatusRef, (snapshot) => {
                 const seatData = snapshot.val() || {};
+                loadingIndicator.style.display = "none";
 
                 seatingChart.innerHTML = "";
+                let occupiedCount = 0;
 
                 for (let i = 0; i < rows; i++) {
                     if (i === 4) {
@@ -297,6 +343,7 @@
 
                         if (seatData[seatId]) {
                             seatElement.classList.add("occupied");
+                            occupiedCount++;
                         }
 
                         seatElement.textContent = seatId;
@@ -316,6 +363,11 @@
                     }
                     seatingChart.appendChild(rowElement);
                 }
+
+                const availableSeats = totalSeats - occupiedCount;
+                document.querySelector(
+                    ".legend"
+                ).innerHTML += `<p>Total Seats Available: ${availableSeats}</p>`;
             });
 
             bookingForm.addEventListener("submit", (e) => {
@@ -328,6 +380,8 @@
                 const phone = document.getElementById("phone").value;
                 const seatNumber = document.getElementById("seatNumber").value;
 
+                loadingIndicator.style.display = "block";
+
                 set(ref(database, `seats/${seatNumber}`), {
                     status: "occupied",
                     name,
@@ -335,24 +389,35 @@
                     semester,
                     email,
                     phone,
-                });
+                })
+                    .then(() => {
+                        loadingIndicator.style.display = "none";
+                        if (selectedSeat) {
+                            selectedSeat.classList.remove("selected");
+                            selectedSeat.classList.add("occupied");
+                        }
 
-                if (selectedSeat) {
-                    selectedSeat.classList.remove("selected");
-                    selectedSeat.classList.add("occupied");
-                }
+                        bookingForm.style.display = "none";
+                        bookingForm.reset();
+                        selectedSeat = null;
 
-                bookingForm.style.display = "none";
-                bookingForm.reset();
-                selectedSeat = null;
-
-                successMessage.style.display = "block";
-                setTimeout(() => {
-                    successMessage.style.display = "none";
-                    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
-                }, 3000);
+                        successMessage.style.display = "block";
+                        setTimeout(() => {
+                            successMessage.style.display = "none";
+                            window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSfhtN9lejsmBoJ7Ux3UYuwjNyYAEKpQFB1-dVrJCpaY1ZWyEQ/viewform?usp=header"; // Update with the correct form URL
+                        }, 3000);
+                    })
+                    .catch((error) => {
+                        loadingIndicator.style.display = "none";
+                        errorMessage.textContent = "Failed to book seat. Error: " + error.message;
+                        errorMessage.style.display = "block";
+                        setTimeout(() => {
+                            errorMessage.style.display = "none";
+                        }, 3000);
+                    });
             });
         });
     </script>
 </body>
 </html>
+
