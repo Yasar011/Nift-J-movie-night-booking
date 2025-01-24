@@ -210,20 +210,19 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="WhatsApp Image 2025-01-24 at 20.51.30_1c4a1da7.jpg" alt="college logo"> <img src="adventure and photography club logo-Recovered.jpg" alt="Club Logo">
+            <img src="WhatsApp Image 2025-01-24 at 20.51.30_1c4a1da7.jpg" alt="College Logo">  <img src="adventure and photography club logo-Recovered.jpg" alt="Club Logo">
             <h1>National Institute of Fashion Technology, Jodhpur</h1>
             <p>Adventure & Photography Club</p>
-
             <p><strong>Movie:</strong> Border</p>
             <p><strong>Show Time:</strong> 9:15 PM</p>
             <p><strong>Price:</strong> ₹29</p>
-            
+     
         </div>
 
         <div class="legend">
-            <p><strong>Movie:</strong> Border</p>
-            <p><strong>Show Time:</strong> 9:15 PM</p>
-            <p><strong>Price:</strong> ₹29</p>
+            <div><div class="box available"></div>Available</div>
+            <div><div class="box selected"></div>Selected</div>
+            <div><div class="box occupied"></div>Occupied</div>
         </div>
 
         <div class="screen">Screen</div>
@@ -233,9 +232,9 @@
 
         <form id="bookingForm">
             <div class="movie-details">
-                <p><strong>Movie:</strong> Aavesham</p>
-                <p><strong>Show Time:</strong> 9:00 PM</p>
-                <p><strong>Price:</strong> ₹300</p>
+                <p><strong>Movie:</strong> Border</p>
+                <p><strong>Show Time:</strong> 9:15 PM</p>
+                <p><strong>Price:</strong> ₹29</p>
             </div>
 
             <h3>Booking Details</h3>
@@ -322,7 +321,6 @@
                             const gapSeat = document.createElement("div");
                             gapSeat.classList.add("gap-seat");
                             rowElement.appendChild(gapSeat);
-                            continue;
                         }
 
                         const seatElement = document.createElement("div");
@@ -383,7 +381,7 @@
                 successMessage.style.display = "block";
                 setTimeout(() => {
                     successMessage.style.display = "none";
-                    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSfhtN9lejsmBoJ7Ux3UYuwjNyYAEKpQFB1-dVrJCpaY1ZWyEQ/viewform?usp=header";
+                    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSd0m89yBYsKqXS1Bni_W0nqbRVs2Gc8uaLlHAg9VXGVJlxQBQ/viewform?usp=header";
                 }, 3000);
             });
         });
